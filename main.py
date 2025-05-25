@@ -32,7 +32,10 @@ if __name__ == '__main__':
         'count_480m',
         'count_720m',
         'count_1440m',
-        'time_diff_prev', 'finalticketprice', 'baseticketprice', 'ticketscount'
+        'time_diff_prev',
+        'finalticketprice',
+        'baseticketprice',
+        'ticketscount'
     ]
 
     geo_features = ['distance_prev', 'speed_kmh', 'has_coords', 'geo_cluster']

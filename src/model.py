@@ -4,10 +4,10 @@ from tensorflow.keras import layers, Model
 
 def build_autoencoder(input_dim):
     class AnomalyDetector(Model):
-        def __init__(self, input_dim):
-            super(AnomalyDetector, self).__init__()
+        def __init__(self, input_dim, **kwargs):
+            super(AnomalyDetector, self).__init__(**kwargs)
             self.encoder = tf.keras.Sequential([
-                layers.Dense(16, activation='relu', input_shape=(input_dim,)),
+                layers.Dense(16, activation='relu'),
                 layers.Dense(8, activation='relu'),
                 layers.Dense(4, activation='relu')
             ])

@@ -5,8 +5,8 @@ import hdbscan
 from haversine import haversine
 
 
-def deg_to_rad(X):
-    return np.radians(X)
+def deg_to_rad(x):
+    return np.radians(x)
 
 
 def add_hdbscan_clusters(df):
