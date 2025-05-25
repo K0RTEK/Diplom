@@ -18,31 +18,20 @@ def prepare_data(df, cutoff_date="2025-03-21"):
 
 
 def preprocess_features(df, feature_cols, max_value=1e6):
-    X = df[feature_cols].replace([np.inf, -np.inf], np.nan)
-    X = X.fillna(0).values
-    X = np.clip(X, a_min=None, a_max=max_value)
-    return X
+    x = df[feature_cols].replace([np.inf, -np.inf], np.nan)
+    x = x.fillna(0).values
+    x = np.clip(x, a_min=None, a_max=max_value)
+    return x
 
 
-def scale_features(X_train, X_test):
+def scale_features(x_train, x_test):
     scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    return X_train_scaled, X_test_scaled, scaler
+    x_train_scaled = scaler.fit_transform(x_train)
+    x_test_scaled = scaler.transform(x_test)
+    return x_train_scaled, x_test_scaled, scaler
 
 
-def build_autoencoder(input_dim):
-    input_layer = Input(shape=(input_dim,))
-    encoded = Dense(64, activation='relu')(input_layer)
-    encoded = Dense(32, activation='relu')(encoded)
-    decoded = Dense(64, activation='relu')(encoded)
-    output_layer = Dense(input_dim, activation='sigmoid')(decoded)
-
-    autoencoder = Model(input_layer, output_layer)
-    return autoencoder
-
-
-def train_model(model, X_train_scaled, X_test_scaled):
+def train_model(model, x_train_scaled, x_test_scaled):
     model.compile(optimizer='adam', loss='mse')
 
     early_stopping = EarlyStopping(
@@ -60,19 +49,19 @@ def train_model(model, X_train_scaled, X_test_scaled):
     )
 
     history = model.fit(
-        X_train_scaled, X_train_scaled,
+        x_train_scaled, x_train_scaled,
         epochs=50,
         batch_size=512,
-        validation_data=(X_test_scaled, X_test_scaled),
+        validation_data=(x_test_scaled, x_test_scaled),
         callbacks=[early_stopping, reduce_lr],
         verbose=1
     )
     return model, history
 
 
-def detect_anomalies(df_test, X_test_scaled, model, threshold_quantile=0.995):
-    X_test_recon = model.predict(X_test_scaled)
-    mse = np.mean((X_test_scaled - X_test_recon) ** 2, axis=1)
+def detect_anomalies(df_test, x_test_scaled, model, threshold_quantile=0.995):
+    x_test_recon = model.predict(x_test_scaled)
+    mse = np.mean((x_test_scaled - x_test_recon) ** 2, axis=1)
     threshold = np.quantile(mse, threshold_quantile)
 
     df_test = df_test.copy().reset_index(drop=True)
@@ -86,14 +75,14 @@ def detect_anomalies(df_test, X_test_scaled, model, threshold_quantile=0.995):
 def detect_anomalies_main(df, feature_cols):
     df_train, df_test = prepare_data(df)
 
-    X_train = preprocess_features(df_train, feature_cols)
-    X_test = preprocess_features(df_test, feature_cols)
+    x_train = preprocess_features(df_train, feature_cols)
+    x_test = preprocess_features(df_test, feature_cols)
 
-    X_train_scaled, X_test_scaled, scaler = scale_features(X_train, X_test)
+    x_train_scaled, x_test_scaled, scaler = scale_features(x_train, x_test)
 
-    model = build_autoencoder(X_train_scaled.shape[1])
-    model, history = train_model(model, X_train_scaled, X_test_scaled)
+    model = build_autoencoder(x_train_scaled.shape[1])
+    model, history = train_model(model, x_train_scaled, x_test_scaled)
 
-    df_test = detect_anomalies(df_test, X_test_scaled, model)
+    df_test = detect_anomalies(df_test, x_test_scaled, model)
 
     return df_test, model, scaler, history
