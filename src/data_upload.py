@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 def load_and_preprocess_data(path: str) -> pd.DataFrame:
     df = pd.read_csv(path, parse_dates=['receiveddatetime'])
 

@@ -27,3 +27,4 @@ def build_autoencoder(input_dim):
 
 def save_model(model, path):
     model.save(path)
+

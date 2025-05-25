@@ -26,7 +26,8 @@ def add_hdbscan_clusters(df):
         core_dist_n_jobs=-1
     )
 
-    valid_coords_df.loc[:, 'geo_cluster'] = clusterer.fit_predict(coords_rad)
+    valid_coords_df = valid_coords_df.copy()
+    valid_coords_df['geo_cluster'] = clusterer.fit_predict(coords_rad)
 
     df['geo_cluster'] = -2
     df.update(valid_coords_df[['geo_cluster']])
@@ -54,8 +55,8 @@ def add_geo_features(df):
     df['time_diff_prev_hours'] = df['time_diff_prev'] / 3600
     df['speed_kmh'] = df['distance_prev'] / df['time_diff_prev_hours'].replace([np.inf, -np.inf], np.nan).fillna(0)
 
-    df['speed_kmh'].replace([np.inf, -np.inf], np.nan, inplace=True)
-    df['speed_kmh'].fillna(0, inplace=True)
+    df['speed_kmh'] = df['speed_kmh'].replace([np.inf, -np.inf], np.nan)
+    df['speed_kmh'] = df['speed_kmh'].fillna(0)
 
     df = add_hdbscan_clusters(df)
 

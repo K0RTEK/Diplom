@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn.manifold import TSNE
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 
 def plot_clusters_on_map(df):
@@ -58,7 +59,7 @@ def plot_error_distribution(df_test):
     cdf = np.arange(len(sorted_e)) / len(sorted_e)
     ax2 = plt.gca().twinx()
     ax2.plot(sorted_e, cdf, color='black', linestyle='--', label='CDF')
-    plt.xscale('Лог-шкала')
+    plt.xscale('log')
     plt.xlabel('Ошибка реконструкции (MSE)')
     plt.ylabel('Плотность / CDF')
     plt.title('Распределение ошибок и CDF (лог‐шкала)')
@@ -87,27 +88,36 @@ def plot_reconstruction_error_distribution(df_test):
     anom_errors = df_test['anomaly_score'][df_test['anomaly_score'] > thr]
 
     plt.style.use('default')
-    fig, ax = plt.subplots(figsize=(10, 4))
+    fig, ax = plt.subplots(figsize=(10, 4), constrained_layout=True)
 
-    ax.hist(norm_errors, bins=100, alpha=0.7, color='skyblue',
-            label=f'Normal ({len(norm_errors)})')
-    ax.hist(anom_errors, bins=20, alpha=0.9, color='salmon',
-            label=f'Anomaly ({len(anom_errors)})')
-    ax.axvline(thr, color='k', linestyle='--', linewidth=2,
-               label=f'Threshold ({thr:.2f})')
-
+    ax.hist(norm_errors, bins=100, alpha=0.7, label=f'Нормальные ({len(norm_errors)})')
+    ax.hist(anom_errors, bins=20, alpha=0.9, label=f'Аномальные ({len(anom_errors)})')
+    ax.axvline(thr, color='k', linestyle='--', linewidth=2, label=f'Порог ({thr:.2f})')
     ax.set_xscale('log')
     ax.set_xlim(norm_errors.min() * 0.8, max(anom_errors.max() * 1.2, thr * 10))
     ax.set_xlabel('MSE')
     ax.set_ylabel('Frequency')
     ax.set_title('Распределение ошибок реконструкции')
-    ax.legend(loc='upper right')
+    ax.legend(loc='upper left')
+    ax.vlines(anom_errors, ymin=0, ymax=ax.get_ylim()[1] * 0.02, alpha=0.3, linewidth=0.5)
 
-    ax.vlines(anom_errors, ymin=0, ymax=ax.get_ylim()[1] * 0.02,
-              color='salmon', alpha=0.3, linewidth=0.5)
+    ax_ins = inset_axes(ax,
+                        width="30%", height="30%",
+                        loc='upper right', borderpad=1.4)
 
-    plt.tight_layout()
-    plt.show()
-    plt.tight_layout()
-    fig.savefig('error_distribution.png', dpi=150)
+    x_max = anom_errors.max() * 1.1
+    bins = np.logspace(np.log10(thr), np.log10(x_max), 500)
+
+    ax_ins.hist(anom_errors, bins=bins, alpha=0.9)
+    ax_ins.axvline(thr, color='k', linestyle='--', linewidth=1)
+
+    ax_ins.set_xscale('log')
+    ax_ins.set_xlim(thr, x_max)
+
+    counts, _ = np.histogram(anom_errors, bins=bins)
+    ax_ins.set_ylim(0, counts.max() * 1.2)
+
+    ax_ins.set_title('Приближение: аномалии', fontsize=8)
+    ax_ins.tick_params(axis='both', which='major', labelsize=6)
+
     plt.show()

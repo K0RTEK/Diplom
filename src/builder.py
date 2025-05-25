@@ -54,7 +54,6 @@ def scale_features(x_train, x_test):
     x_test_scaled = scaler.transform(x_test)
     return x_train_scaled, x_test_scaled, scaler
 
-
 def train_model(model, x_train_scaled, x_test_scaled):
     model.compile(optimizer='adam', loss='mse')
 
@@ -95,8 +94,12 @@ def detect_anomalies(df_test, x_test_scaled, model, threshold_quantile=0.995):
 
     return df_test
 
+def save_anomalies(df_test, path):
+    anomalies = df_test[df_test['is_anomaly']]
+    anomalies.to_csv(path, index=False)
 
-def detect_anomalies_main(df, feature_cols=None):
+
+def detect_anomalies_main(df, result_path, feature_cols=None):
     if feature_cols is None:
         feature_cols = DEFAULT_FEATURES
 
@@ -112,4 +115,6 @@ def detect_anomalies_main(df, feature_cols=None):
 
     df_test = detect_anomalies(df_test, x_test_scaled, model)
 
-    return df_test, model, scaler, history
+    save_anomalies(df_test, result_path)
+
+    return df_test, model, scaler, history, x_test_scaled
