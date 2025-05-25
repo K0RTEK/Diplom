@@ -5,6 +5,30 @@ from src.model import build_autoencoder
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
+DEFAULT_FEATURES = [
+            'count_1m',
+            'count_5m',
+            'count_10m',
+            'count_20m',
+            'count_30m',
+            'count_40m',
+            'count_50m',
+            'count_60m',
+            'count_120m',
+            'count_180m',
+            'count_240m',
+            'count_480m',
+            'count_720m',
+            'count_1440m',
+            'time_diff_prev',
+            'finalticketprice',
+            'baseticketprice',
+            'ticketscount',
+            'distance_prev',
+            'speed_kmh',
+            'has_coords',
+            'geo_cluster'
+        ]
 
 def prepare_data(df, cutoff_date="2025-03-21"):
     df = df.copy()
@@ -72,7 +96,10 @@ def detect_anomalies(df_test, x_test_scaled, model, threshold_quantile=0.995):
     return df_test
 
 
-def detect_anomalies_main(df, feature_cols):
+def detect_anomalies_main(df, feature_cols=None):
+    if feature_cols is None:
+        feature_cols = DEFAULT_FEATURES
+
     df_train, df_test = prepare_data(df)
 
     x_train = preprocess_features(df_train, feature_cols)

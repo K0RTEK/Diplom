@@ -19,12 +19,11 @@ def add_hdbscan_clusters(df):
     coords = valid_coords_df[['lat', 'lon']].values
     coords_rad = deg_to_rad(coords)
 
-    # Настройка HDBSCAN
     clusterer = hdbscan.HDBSCAN(
-        min_cluster_size=10,  # минимальный размер кластера
-        min_samples=5,  # количество соседей для точки
-        metric='haversine',  # метрика Хаверсина для геокоординат
-        core_dist_n_jobs=-1  # использовать все ядра
+        min_cluster_size=10,
+        min_samples=5,
+        metric='haversine',
+        core_dist_n_jobs=-1
     )
 
     valid_coords_df.loc[:, 'geo_cluster'] = clusterer.fit_predict(coords_rad)
@@ -56,7 +55,7 @@ def add_geo_features(df):
     df['speed_kmh'] = df['distance_prev'] / df['time_diff_prev_hours'].replace([np.inf, -np.inf], np.nan).fillna(0)
 
     df['speed_kmh'].replace([np.inf, -np.inf], np.nan, inplace=True)
-    df['speed_kmh'].fillna(0, inplace=True)  # или другой метод заполнения
+    df['speed_kmh'].fillna(0, inplace=True)
 
     df = add_hdbscan_clusters(df)
 
