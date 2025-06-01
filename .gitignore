@@ -2,4 +2,5 @@
 .gitignore
 data
 notebooks
+.venv
 ultra_mega_giga_last.ipynb
