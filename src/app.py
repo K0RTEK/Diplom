@@ -20,15 +20,6 @@ uploaded_file = st.sidebar.file_uploader(
 if uploaded_file is not None:
     try:
         df = pd.read_csv(uploaded_file, parse_dates=["receiveddatetime", "transactiontime", "tarifficationdatetime", "date"])
-        # print("Дата:", df['date'].values[0])
-        # df["date"] = pd.to_datetime(
-        #     df["date"],
-        #     infer_datetime_format=True,
-        #     dayfirst=True,  # дублируем, чтобы pandas был уверен
-        #     errors="raise"  # сразу бросит ошибку, если что-то не так
-        # )
-        # df["date"] = df["date"].dt.strftime("%d.%m.%Y %H:%M")
-        # print(df['date'].values[0])
     except Exception as e:
         st.error(f"Не удалось загрузить данные: {e}")
         st.stop()
